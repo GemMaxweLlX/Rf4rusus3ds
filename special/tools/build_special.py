@@ -87,11 +87,14 @@ if os.path.exists(os.path.join(TR,'src.json')):
         for ln in open(p,encoding='utf-8'):
             ln=ln.rstrip('\n')
             if ln.strip():
-                k,t=ln.split('\t',1); fk,ek=_src[int(k)]; TRMAP[(fk,ek)]=t.replace('\\n','\n')
-TOK=re.compile(r'＠(?!‡)[^＠]*＠')
+                k,t=ln.split('\t',1); fk,ek=_src[int(k)]
+                t=re.sub(r'\{U\+([0-9A-Fa-f]{4})\}',lambda m: chr(int(m.group(1),16)),t.replace('\\n','\n'))
+                TRMAP[(fk,ek)]=t
+TOK=re.compile(r'＠[^＠]*＠'); GT=re.compile(r'＠‡[^＠]*＠'); PUA=re.compile('[\ue000-\uf8ff]')
 bad=0
 for (fk,ek),t in TRMAP.items():
-    if sorted(TOK.findall(ek))!=sorted(TOK.findall(t)) or ek.count('＋')!=t.count('＋') or ek.count('%')!=t.count('%'):
+    t2=GT.sub('',t)
+    if sorted(TOK.findall(ek))!=sorted(TOK.findall(t2)) or ek.count('＋')!=t2.count('＋') or ek.count('%')!=t.count('%') or sorted(PUA.findall(ek))!=sorted(PUA.findall(t)):
         print('TOKEN MISMATCH',fk,repr(ek),repr(t)); bad+=1
 report=[]
 for f in sorted(os.listdir(SP_EN)):
