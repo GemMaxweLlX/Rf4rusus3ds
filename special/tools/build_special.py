@@ -50,6 +50,22 @@ def gloss(x):
     for a,b in GLOSS.items(): x=re.sub(r'(?<![А-Яа-яЁё])'+a+r'(?![а-яё])',b,x)
     return x
 
+# ---------- перевод MonkaKarlo: имена по глоссарию и мелкие опечатки
+MKFIX={'Вулканон':'Волканон','Вулканона':'Волканона','Вулканону':'Волканону','Порколинам':'Порколином','Зехс':'Зекс','Рэйвэн':'Рэйвен',
+ 'Победиет':'Победите','Сент-Кокиль':'Сент-Кокий','кристального':'хрустального','Кристального':'Хрустального'}
+MKSUB=[('Поговоритете','Поговорите'),('поговоритете','поговорите'),('Спроситете','Спросите'),('Исследуйте в Водные','Исследуйте Водные'),('Киелем','Килом'),
+ ('Идите в Осеннее озеро','Идите к Осенней реке'),('Идите в Серебряному озеру','Идите к озеру Серчерезо'),('Идите в Серебряное озеро','Идите к Серебряному озеру'),
+ ('Идите в Озеро дракона','Идите к Озеру дракона'),('кристалл череп','хрустальный череп'),('Победи Белого','Победите Белого'),('Территорию Зекс ','Территорию Зекса '),
+ ('Территории Зекс.','Территории Зекса.'),('Территорию Зекс.','Территорию Зекса.'),('солдата Зекс ','солдата Зекса '),('«Крошечный бинт»','«Маленький бинт»'),
+ ('цветочный магазин У Карнейшн','цветочную лавку «Гвоздика»'),('босса монстра','босса'),('кальмара лампу','ламповидного кальмара'),('лампового кальмара','ламповидного кальмара'),
+ ('чаем от бессонницы','чаем «Бессонница»'),('Поместье Сент-Кокий','поместье Сент-Кокий')]
+def mkfix(x):
+    for a,b in MKSUB: x=x.replace(a,b)
+    x=gloss(x)
+    for a,b in MKFIX.items(): x=re.sub(r'(?<![А-Яа-яЁё-])'+a+r'(?![а-яё])',b,x)
+    for a,b in MKSUB: x=x.replace(a,b)
+    return x
+
 # ---------- wrapping
 TAGW=re.compile(r'＠‡([^,＠]*),([^＠]*)＠|＠[^＠]*＠')
 def dlen(s):  # приблизительная длина на экране
@@ -106,6 +122,9 @@ for f in sorted(os.listdir(SP_EN)):
     mtp=os.path.join(ROOT,'special','machine',f); mtt=mtp+'.txt'
     mt=read_eng(mtp)[1] if os.path.exists(mtp) else (read_txt(mtt) if os.path.exists(mtt) else None)
     if mt is not None and len(mt)!=len(sp): mt=None
+    mkp=os.path.join(ROOT,'special','monkakarlo',f)
+    mk=read_eng(mkp)[1] if os.path.exists(mkp) else None
+    if mk is not None and len(mk)!=len(sp): mk=None
     edits={}
     tp=os.path.join(TR,f+'.tsv')
     if os.path.exists(tp):
@@ -148,6 +167,7 @@ for f in sorted(os.listdir(SP_EN)):
             out.append(adapt(x,ds_en[j],ru) if ds_en is not None else ru); src.append('3DS≈' if i in approx else '3DS')
         elif not x: out.append(''); src.append('пусто')
         elif (f,x) in TRMAP: out.append(TRMAP[(f,x)]); src.append('перевод')
+        elif mk is not None and mk[i] and mk[i]!=x and re.search('[А-Яа-яЁё]',mk[i]): out.append(mkfix(mk[i])); src.append('MonkaKarlo')
         elif mt is not None and mt[i]: out.append(gloss(mt[i])); src.append('машинный')
         elif not re.search('[A-Za-z]',x): out.append(x); src.append('служебное')
         else: out.append(x); src.append('англ.')
