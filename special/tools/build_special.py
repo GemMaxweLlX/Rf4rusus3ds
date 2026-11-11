@@ -181,7 +181,11 @@ for f in sorted(os.listdir(SP_EN)):
         elif mt is not None and mt[i]: out.append(gloss(mt[i])); src.append('машинный')
         elif not re.search('[A-Za-z]',x): out.append(x); src.append('служебное')
         else: out.append(x); src.append('англ.')
-    if f=='rf3mc.eng':   # слишком длинные строки диалогов переносим под ширину окна
+    if f=='rf3mc.eng':   # строки из 3DS (окно на 40 символов) растягиваем под широкое окно ПК
+        for i,x in enumerate(out):
+            if src[i] in ('3DS','3DS≈') and '\n' in x and '%' not in x and '＋[' not in x and '／' not in x:
+                y=wrap_to(x,BOX)
+                if y.count('\n')<x.count('\n'): out[i]=y
         for i,x in enumerate(out):
             if '%' not in x and any(dlen(l)>BOX+4 and ' ' in l for l in x.split('\n')):
                 out[i]='\n'.join(wrap_to(l,BOX) if dlen(l)>BOX+4 else l for l in x.split('\n'))
