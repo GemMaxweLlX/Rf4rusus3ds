@@ -1,0 +1,20 @@
+Русский перевод Rune Factory 4 Special для Nintendo Switch (Atmosphere)
+=======================================================================
+
+Нужна консоль с прошивкой Atmosphere (LayeredFS).
+
+1. Узнайте TitleID вашей версии игры (16 символов, начинается с 0100...).
+   Его показывают DBI, Tinfoil, Goldleaf, а также имя папки в дампе игры.
+2. Создайте на SD-карте папку:
+      atmosphere/contents/<TitleID>/
+   Пример: atmosphere/contents/0100XXXXXXXXXXXX/
+3. Скопируйте в неё папку romfs из этого архива. Должно получиться:
+      atmosphere/contents/<TitleID>/romfs/script/rf3mc.eng
+      atmosphere/contents/<TitleID>/romfs/text/...
+      atmosphere/contents/<TitleID>/romfs/textAndData/text/...
+4. Запустите игру с английским языком.
+
+Удаление: удалите папку atmosphere/contents/<TitleID>/romfs.
+
+Перевод собран по английским файлам Switch-версии. Тексты почти полностью совпадают со Steam-версией.
+Если какой-то текст вылезает за край окна, пришлите фото экрана.

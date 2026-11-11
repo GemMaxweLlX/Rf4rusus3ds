@@ -17,7 +17,7 @@ from rf4s_txt import read_eng,write_eng,read_txt
 import openpyxl
 
 SP_EN,DS_TEXT_EN=sys.argv[1],sys.argv[2]
-OUT=os.path.join(ROOT,'special','Bundle'); TAB=os.path.join(ROOT,'special','tables'); TR=os.path.join(ROOT,'special','tr')
+OUT=os.environ.get('RF4S_OUT',os.path.join(ROOT,'special','Bundle')); TAB=os.environ.get('RF4S_TAB',os.path.join(ROOT,'special','tables')); TR=os.path.join(ROOT,'special','tr')
 os.makedirs(OUT,exist_ok=True); os.makedirs(TAB,exist_ok=True)
 
 def n2(x):
