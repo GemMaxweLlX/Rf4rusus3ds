@@ -1,0 +1,191 @@
+ATK
+DEF
+M.ATK
+M.DEF
+STR
+VIT
+INT
+None
+Race
+(
+owned)
+Total
+Backpack
+Rune Ability
+Fridge
+Storage
+Bookshelf
+Weapon Box
+Closet
+Farm Tool Box
+Shipping Box
+Shop Box
+”%s”{LF}Is this OK?
+Abandon the entered{LF}name and set ”%s”.
+Enter your name
+Enter the monster's name
+Enter the farm's name
+Enter the field's name
+Enter the barn's name
+Enter your child's name
+Notebook
+Pending Requests
+You have no requests.
+Request from %s:{LF}”%s”{LF}Accept this?
+Request from %s:{LF}”%s”{LF}Cancel this?
+You already have a{LF}request from %s:{LF}”%s”
+[Requester: %s]
+Cancel Request
+[Current Request]{LF} %s
+No Requests
+Completed: %3dx
+Crops
+Medicine
+Weapons
+Armor
+Crafts
+Food
+Fish
+Other
+%s Farm
+Total Value
+Achieved
+Achieved
+%dG
+%d%
+%dG
+%dcm
+Name
+Value
+Size
+No Shipped Crops
+No Shipped Medicine
+No Shipped Weapons
+No Shipped Armor
+No Shipped Crafts
+No Shipped Food
+No Shipped Fish
+No Shipped Misc.
+Skills
+Recipes
+Friendship Levels
+No Skills
+No Recipes
+No Friends
+No Monster Friends
+No Party
+Homemade
+Frying Pan
+Pot
+Steamer
+Knife
+Mixer
+Oven
+Chemistry Set
+Short Sword
+Long Sword
+Spear
+Axe/Hammer
+Axe
+Sickle
+Waterpot
+Hoe
+Pole
+Staff
+Dual Blades
+Fist
+Farm Tool
+Accessory
+Shield
+Headgear
+Shoes
+Armor
+Homemade Recipes: %3d% acquired{LF}{LF}{LF}{LF}
+Frying Pan Recipes: %3d% acquired{LF}{LF}{LF}{LF}
+Pot Recipes: %3d% acquired{LF}{LF}{LF}{LF}
+Steamer Recipes: %3d% acquired{LF}{LF}{LF}{LF}
+Knife Recipes: %3d% acquired{LF}{LF}{LF}{LF}
+Mixer Recipes: %3d% acquired{LF}{LF}{LF}{LF}
+Oven Recipes: %3d% acquired{LF}{LF}{LF}{LF}
+Pharmacy Recipes: %3d% acquired{LF}{LF}{LF}{LF}
+Short Sword Recipes: %3d% acquired{LF}{LF}{LF}{LF}
+Long Sword Recipes: %3d% acquired{LF}{LF}{LF}{LF}
+Spear Recipes: %3d% acquired{LF}{LF}{LF}{LF}
+Axe/hammer Recipes: %3d% acquired{LF}{LF}{LF}{LF}
+Axe Recipes: %3d% acquired{LF}{LF}{LF}{LF}
+Staff Recipes: %3d% acquired{LF}{LF}{LF}{LF}
+Dual Blades Recipes: %3d% acquired{LF}{LF}{LF}{LF}
+Fist Recipes: %3d% acquired{LF}{LF}{LF}{LF}
+Farm Tool Recipes: %3d% acquired{LF}{LF}{LF}{LF}
+Accessory Recipes: %3d% acquired{LF}{LF}{LF}{LF}
+Shield Recipes: %3d% acquired{LF}{LF}{LF}{LF}
+Headgear Recipes: %3d% acquired{LF}{LF}{LF}{LF}
+Shoes Recipes: %3d% acquired{LF}{LF}{LF}{LF}
+Armor Recipes: %3d% acquired{LF}{LF}{LF}{LF}
+Turn the BGM on/off. For those who want to{LF}listen to the sound effects, or their own music.
+Turn the sound effects on/off. For those who{LF}want to fully enjoy the BGM.
+Turn the character voices on/off. For those who{LF}only want to read the text.
+Turn the character portraits on/off. For shy{LF}players.
+Zoom in
+BGM on/off
+SFX on/off
+Voice on/off
+Character pics on/off
+Menu Color
+Settings
+Item Synthesis
+Make an Item
+Upgrade an Item
+No more space left!
+You have 0 HP!{LF}You can't move...
+Calculating RP needed...
+Not enough RP!
+Do not use recipe
+Learned how to{LF}make %s!
+x %d
+Cook Lv.%d
+Chem. Lv.%d
+Forge Lv.%d
+Craft Lv.%d
+Schedule
+Spring
+Summer
+Autumn
+Winter
+Year %d
+Day %d
+%s
+%s{LF}%s{LF}%s{LF}%s{LF}%s
+%s's Birthday
+Unity Festival
+Wedding Anniversary
+%s's Birthday
+%s's Birthday
+%s's Birthday
+%s's Birthday
+%s's Birthday
+Open the Online Manual?
+marvelouseurope.github.io/RuneFactory4Special
+Stop watching this episode?{LF}(The next time you start the episode, it will play from the beginning.)
+Lest
+Frey
+Amber
+Dolce
+Clorica
+Margaret
+Xiao Pai
+Forte
+Dylas
+Leon
+Vishnal
+Arthur
+Doug
+Kiel
+Ventuswill
+Enter your birthday.
+%s %d.{LF}Is this correct?
+Open Nintendo eShop?
+Start Another Episode (%s).
+Available with purchase from the Nintendo eShop.
+Start Newlywed Episode (%s).
+Marry %s to unlock this episode.
