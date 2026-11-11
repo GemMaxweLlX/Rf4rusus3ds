@@ -22,7 +22,7 @@ os.makedirs(OUT,exist_ok=True); os.makedirs(TAB,exist_ok=True)
 
 def n2(x):
     x=re.sub(r"^''|''$","",x.strip()); x=re.sub(r'^＊','',x)
-    x=x.replace("''","").replace('…','...')
+    x=x.replace("''","").replace('"','').replace('”','').replace('“','').replace('…','...')
     return re.sub(r'\s+',' ',x).strip()
 
 # ---------- 3DS sources: (english list or None, russian list)
@@ -68,7 +68,9 @@ def adapt(sp,ds,ru):
     """Перевод 3DS -> строка Special: кавычки '' и ＊, перенос под ширину Special."""
     if sp==ds: return ru
     core=ru
-    if sp.startswith("''") and sp.endswith("''") and not ds.startswith("''"): core="''"+core+"''"
+    if sp.startswith("''") and sp.endswith("''") and len(sp)>4 and not core.startswith("''"):
+        m=re.fullmatch(r'\s*[«"“](.*)[»"”]\s*',core,re.S)
+        core="''"+(m.group(1) if m else core)+"''"
     if sp.startswith('＊') and not ds.startswith('＊') and not core.startswith('＊'): core='＊'+core
     if sp.replace('\n',' ')!=ds.replace('\n',' ') and n2(sp)!=n2(ds): return core
     if '\n' in ds and '\n\n' not in ru and '%' not in ds:
@@ -76,6 +78,21 @@ def adapt(sp,ds,ru):
         return wrap_to(core,BOX)
     return core
 
+# ---------- новый перевод строк Special: special/tr/src.json + part*.tsv (номер<TAB>перевод)
+TRMAP={}
+if os.path.exists(os.path.join(TR,'src.json')):
+    import glob
+    _src=json.load(open(os.path.join(TR,'src.json'),encoding='utf-8'))
+    for p in sorted(glob.glob(os.path.join(TR,'part*.tsv'))):
+        for ln in open(p,encoding='utf-8'):
+            ln=ln.rstrip('\n')
+            if ln.strip():
+                k,t=ln.split('\t',1); fk,ek=_src[int(k)]; TRMAP[(fk,ek)]=t.replace('\\n','\n')
+TOK=re.compile(r'＠(?!‡)[^＠]*＠')
+bad=0
+for (fk,ek),t in TRMAP.items():
+    if sorted(TOK.findall(ek))!=sorted(TOK.findall(t)) or ek.count('＋')!=t.count('＋') or ek.count('%')!=t.count('%'):
+        print('TOKEN MISMATCH',fk,repr(ek),repr(t)); bad+=1
 report=[]
 for f in sorted(os.listdir(SP_EN)):
     if not f.endswith('.eng'): continue
@@ -90,11 +107,19 @@ for f in sorted(os.listdir(SP_EN)):
         for ln in open(tp,encoding='utf-8'):
             ln=ln.rstrip('\n')
             if ln.strip(): i,t=ln.split('\t',1); edits[int(i)]=t.replace('\\n','\n')
-    pair={}   # special idx -> 3DS idx
+    pair={}; approx=set()   # special idx -> 3DS idx
     if ds_en is not None:
         sm=difflib.SequenceMatcher(None,[n2(x) for x in sp],[n2(x) for x in ds_en],autojunk=False)
-        for a,b,z in sm.get_matching_blocks():
-            for k in range(z): pair[a+k]=b+k
+        for tag,a1,a2,b1,b2 in sm.get_opcodes():
+            if tag=='equal':
+                for k in range(a2-a1): pair[a1+k]=b1+k
+            elif tag=='replace' and a2-a1==b2-b1:
+                # строки на тех же местах: в таблице 3DS вместо английского уже стоял русский
+                # или текст в Special слегка переписан
+                for k in range(a2-a1):
+                    x,y=sp[a1+k],ds_en[b1+k]
+                    if re.search('[А-Яа-яЁё]',y) or difflib.SequenceMatcher(None,n2(x),n2(y)).ratio()>=0.75:
+                        pair[a1+k]=b1+k; approx.add(a1+k)
         first={}
         for j,x in enumerate(ds_en): first.setdefault(n2(x),j)
         for i,x in enumerate(sp):
@@ -115,8 +140,9 @@ for f in sorted(os.listdir(SP_EN)):
         if i in edits: out.append(edits[i]); src.append('правка')
         elif i in pair and ds_ru[pair[i]]!='':
             j=pair[i]; ru=ds_ru[j]
-            out.append(adapt(x,ds_en[j],ru) if ds_en is not None else ru); src.append('3DS')
+            out.append(adapt(x,ds_en[j],ru) if ds_en is not None else ru); src.append('3DS≈' if i in approx else '3DS')
         elif not x: out.append(''); src.append('пусто')
+        elif (f,x) in TRMAP: out.append(TRMAP[(f,x)]); src.append('перевод')
         elif mt is not None and mt[i]: out.append(gloss(mt[i])); src.append('машинный')
         elif not re.search('[A-Za-z]',x): out.append(x); src.append('служебное')
         else: out.append(x); src.append('англ.')
