@@ -10,8 +10,8 @@ for f in sorted(glob.glob(S+'/tr/part*.tsv')):
 TOK=re.compile(r'＠[^＠]*＠')
 def wrap(en,ru):
     ru=ru.replace('\\n','\n')
-    if '\n' not in en.strip(): return ru
-    w=max(40,max(len(x) for x in en.split('\n')))
+    if '\n' not in en.strip() and len(ru)<=48: return ru
+    w=max(44,max(len(x) for x in en.split('\n')))
     return '\n'.join(l for part in ru.split('\n') for l in (textwrap.wrap(part,w,break_long_words=False,break_on_hyphens=False) or ['']))
 bad=0;m={}
 for i,t in tr.items():
