@@ -96,6 +96,8 @@ for (fk,ek),t in TRMAP.items():
     t2=GT.sub('',t)
     if sorted(TOK.findall(ek))!=sorted(TOK.findall(t2)) or ek.count('＋')!=t2.count('＋') or ek.count('%')!=t.count('%') or sorted(PUA.findall(ek))!=sorted(PUA.findall(t)):
         print('TOKEN MISMATCH',fk,repr(ek),repr(t)); bad+=1
+    for g in GT.findall(t):
+        if not re.fullmatch(r'＠‡[^,\s＠]+,[^,\s＠]+＠',g): print('BADTAG',repr(g),repr(t)); bad+=1
 report=[]
 for f in sorted(os.listdir(SP_EN)):
     if not f.endswith('.eng'): continue
