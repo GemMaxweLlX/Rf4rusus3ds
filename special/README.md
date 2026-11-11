@@ -94,6 +94,7 @@ python3 special/tools/build_special.py <папка с английскими .en
 ## Установка (ПК, Steam)
 
 Готовый архив: `special/patch/RF4S_RUS_Steam.zip`.
+Тот же архив на Google Диске: https://drive.google.com/file/d/1R4BIskMFVQaw0yROceCp0ld_wF51g9Pr/view?usp=drive_link
 
 1. В Steam: правой кнопкой по игре → **Управление → Просмотреть локальные файлы**.
 2. Сделайте резервную копию папки `Bundle` в папке игры.
