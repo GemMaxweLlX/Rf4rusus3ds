@@ -58,7 +58,7 @@ MKSUB=[('Поговоритете','Поговорите'),('поговорит�
  ('Идите в Озеро дракона','Идите к Озеру дракона'),('кристалл череп','хрустальный череп'),('Победи Белого','Победите Белого'),('Территорию Зекс ','Территорию Зекса '),
  ('Территории Зекс.','Территории Зекса.'),('Территорию Зекс.','Территорию Зекса.'),('солдата Зекс ','солдата Зекса '),('«Крошечный бинт»','«Маленький бинт»'),
  ('цветочный магазин У Карнейшн','цветочную лавку «Гвоздика»'),('босса монстра','босса'),('кальмара лампу','ламповидного кальмара'),('лампового кальмара','ламповидного кальмара'),
- ('чаем от бессонницы','чаем «Бессонница»'),('Поместье Сент-Кокий','поместье Сент-Кокий')]
+ ('чаем от бессонницы','чаем «Бессонница»'),('Поместье Сент-Кокий','поместье Сент-Кокий'),('Экипировать ','Надеть ')]
 def mkfix(x):
     for a,b in MKSUB: x=x.replace(a,b)
     x=gloss(x)
@@ -114,6 +114,14 @@ for (fk,ek),t in TRMAP.items():
         print('TOKEN MISMATCH',fk,repr(ek),repr(t)); bad+=1
     for g in GT.findall(t):
         if not re.fullmatch(r'＠‡[^,\s＠]+,[^,\s＠]+＠',g): print('BADTAG',repr(g),repr(t)); bad+=1
+# метки-имена персонажей можно заменить готовым именем, остальные метки терять нельзя
+NAMETAG=re.compile(r'＠[ァ-ヶー]+＠')
+def tokens_ok(en,ru):
+    c=collections.Counter(TOK.findall(GT.sub('',ru)))
+    for t in TOK.findall(en):
+        if c[t]>0: c[t]-=1
+        elif not NAMETAG.fullmatch(t): return False
+    return sorted(PUA.findall(en))==sorted(PUA.findall(ru)) and en.count('%')==ru.count('%')
 report=[]
 for f in sorted(os.listdir(SP_EN)):
     if not f.endswith('.eng'): continue
@@ -143,7 +151,7 @@ for f in sorted(os.listdir(SP_EN)):
                 for k in range(a2-a1):
                     x,y=sp[a1+k],ds_en[b1+k]
                     if re.search('[А-Яа-яЁё]',y) or difflib.SequenceMatcher(None,n2(x),n2(y)).ratio()>=0.75:
-                        pair[a1+k]=b1+k; approx.add(a1+k)
+                        if tokens_ok(x,ds_ru[b1+k]): pair[a1+k]=b1+k; approx.add(a1+k)
         first={}
         for j,x in enumerate(ds_en): first.setdefault(n2(x),j)
         for i,x in enumerate(sp):
