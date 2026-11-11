@@ -40,3 +40,8 @@ python3 special/tools/build_switch.py SWITCH_ROMFS STEAM_EN_DIR DS_EN_TEXT_DIR
 - `STEAM_EN_DIR` и `DS_EN_TEXT_DIR` — те же папки, что для `build_special.py`.
 
 Результат: `switch/romfs/` и таблицы сверки `switch/tables/*.xlsx` (английский, русский, источник).
+
+## Благодарности
+
+- **allodernat** — предоставил файлы Switch-версии.
+- **Bilinezofil** — тестирует перевод на Switch.
