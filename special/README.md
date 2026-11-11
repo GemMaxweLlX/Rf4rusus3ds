@@ -1,5 +1,28 @@
 # Rune Factory 4 Special: обработка машинного перевода
 
+## Авторы и использованные материалы
+
+**MonkaKarlo** (автор русского перевода RF4 Special) разрешила использовать свои файлы.
+Она передала свои исходники: 19 файлов `.eng` и их версии `.txt`. Они лежат без изменений в `special/monkakarlo/`:
+
+`rf3TxtCalendar_split2_2`, `rf3TxtCropName`, `rf3TxtFriendMonsterName`, `rf3TxtItem_split2_1`, `rf3TxtItem_split2_2`,
+`rf3TxtLoad`, `rf3TxtMapName`, `rf3TxtMenuCommon_split1_1`, `rf3TxtNpc_split2_1`, `rf3TxtNpc_split2_2`,
+`rf3TxtSkill_split2_1`, `rf3TxtSkill_split2_2`, `rf3TxtTouchPocket`, `rf3TxtTravelerTitleM`, `rf3TxtTravelerTitleW`,
+`rf4TxtItemParameter_split2_2`, `rf4TxtQuestRequestDetailFormat_split2_2`, `rf4TxtShinkonHelp`, `rf4TxtShop_split2_2`.
+
+Что из них вошло в готовый перевод:
+- **`rf4TxtShinkonHelp`**: 182 строки подсказок к эпизодам молодожёнов. Это весь переведённый текст файла,
+  остальные 178 строк — внутренние заглушки игры `RF4TXT_SHINKONHELP_*`;
+- **`rf3TxtTouchPocket`**: 4 строки «Надеть» со значками кнопок Switch/ПК;
+- в обеих частях имена и термины приведены к общему глоссарию, исправлены мелкие опечатки (список правок — в `MKSUB` и `MKFIX` в `special/tools/build_special.py`).
+
+Остальные её файлы в готовом переводе не используются: эти строки взяты из нашего перевода 3DS.
+
+**Машинный перевод** из архива `Rune_Factory_4_Special_Russian_Translation` (`special/machine/`) был отправной точкой.
+В готовых файлах от него ничего не осталось, кроме ~100 служебных строк без текста (коды анимаций, номера, время).
+
+Всё остальное — наш перевод 3DS и новый перевод строк Special (`special/tr/`).
+
 В этой ветке (`rf4-special`) идёт работа над русским текстом Rune Factory 4 Special (Switch/PC).
 
 ## Что лежит в `special/machine/`
