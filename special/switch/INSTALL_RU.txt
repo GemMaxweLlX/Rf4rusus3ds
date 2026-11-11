@@ -3,18 +3,19 @@
 
 Нужна консоль с прошивкой Atmosphere (LayeredFS).
 
-1. Узнайте TitleID вашей версии игры (16 символов, начинается с 0100...).
-   Его показывают DBI, Tinfoil, Goldleaf, а также имя папки в дампе игры.
-2. Создайте на SD-карте папку:
-      atmosphere/contents/<TitleID>/
-   Пример: atmosphere/contents/0100XXXXXXXXXXXX/
-3. Скопируйте в неё папку romfs из этого архива. Должно получиться:
-      atmosphere/contents/<TitleID>/romfs/script/rf3mc.eng
-      atmosphere/contents/<TitleID>/romfs/text/...
-      atmosphere/contents/<TitleID>/romfs/textAndData/text/...
-4. Запустите игру с английским языком.
+Проверено по файлам версии USA, TitleID 010051D00E3A4000, обновление v65536.
 
-Удаление: удалите папку atmosphere/contents/<TitleID>/romfs.
+1. Скопируйте папку atmosphere из этого архива в корень SD-карты.
+   Должно получиться:
+      SD:/atmosphere/contents/010051D00E3A4000/romfs/script/rf3mc.eng
+      SD:/atmosphere/contents/010051D00E3A4000/romfs/text/...
+      SD:/atmosphere/contents/010051D00E3A4000/romfs/textAndData/text/...
+2. Запустите игру с английским языком.
+
+Если у вас версия другого региона, у неё может быть другой TitleID (16 символов, 0100...).
+Его показывают DBI, Tinfoil, Goldleaf. Тогда переименуйте папку 010051D00E3A4000 в свой TitleID.
+
+Удаление: удалите папку atmosphere/contents/010051D00E3A4000/romfs.
 
 Перевод собран по английским файлам Switch-версии. Тексты почти полностью совпадают со Steam-версией.
 Если какой-то текст вылезает за край окна, пришлите фото экрана.

@@ -4,8 +4,10 @@
 
 ## Готовый патч
 
-`patch/RF4S_RUS_Switch.zip` — папка `romfs` для Atmosphere (LayeredFS) и инструкция `INSTALL_RU.txt`.
-Папку `romfs` нужно положить в `atmosphere/contents/<TitleID игры>/`. Игру запускать на английском языке.
+`patch/RF4S_RUS_Switch.zip` — папка `atmosphere/contents/010051D00E3A4000/romfs` для Atmosphere (LayeredFS) и инструкция `INSTALL_RU.txt`.
+Папку `atmosphere` нужно скопировать в корень SD-карты. Игру запускать на английском языке.
+
+Файлы сверены с версией USA (TitleID `010051D00E3A4000`, обновление v65536).
 
 ## Чем Switch отличается от Steam
 
