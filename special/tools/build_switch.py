@@ -39,7 +39,7 @@ tmp = tempfile.mkdtemp()
 flat = os.path.join(tmp, 'en'); os.makedirs(flat)
 for f, rel in files.items():
     shutil.copy(os.path.join(SW, rel), os.path.join(flat, f))
-env = dict(os.environ, RF4S_OUT=os.path.join(tmp, 'raw'), RF4S_TAB=os.path.join(tmp, 'rawtab'))
+env = dict(os.environ, RF4S_HPRP='0', RF4S_OUT=os.path.join(tmp, 'raw'), RF4S_TAB=os.path.join(tmp, 'rawtab'))
 subprocess.run([sys.executable, '-I', os.path.join(ROOT, 'special', 'tools', 'build_special.py'), flat, DS_EN],
                env=env, check=True, stdout=subprocess.DEVNULL)
 
@@ -64,7 +64,8 @@ for f in sorted(files):
     out, src = [], []
     for i, x in enumerate(sw):
         if i in edits: out.append(edits[i]); src.append('правка Switch')
-        elif i in pair: out.append(st_ru[pair[i]]); src.append('Steam')
+        elif i in pair:   # на Switch панель английская: ОЗ/ОР из Steam-перевода обратно в HP/RP
+            out.append(re.sub('(?<![А-Яа-яЁё])ОЗ(?![А-Яа-яЁё])', 'HP', re.sub('(?<![А-Яа-яЁё])ОР(?![А-Яа-яЁё])', 'RP', st_ru[pair[i]]))); src.append('Steam')
         else: out.append(raw[i]); src.append(rawsrc[i])
     p = os.path.join(OUT, files[f]); os.makedirs(os.path.dirname(p), exist_ok=True)
     write_eng(p, b'TEXT', out)

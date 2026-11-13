@@ -80,6 +80,8 @@ def wrap_to(ru,width):
     if cur: lines.append(cur)
     return '\n'.join(lines)
 BOX=60
+DESC={'rf3TxtItem_split2_2.eng','rf3TxtSkill_split2_2.eng','rf3TxtNpc_split2_2.eng','rf3TxtQuest_split3_3.eng'}; DESCW=50
+HPRP=os.environ.get('RF4S_HPRP','1')=='1'
 def adapt(sp,ds,ru):
     """Перевод 3DS -> строка Special: кавычки '' и ＊, перенос под ширину Special."""
     if sp==ds: return ru
@@ -179,10 +181,20 @@ for f in sorted(os.listdir(SP_EN)):
         elif mt is not None and mt[i]: out.append(gloss(mt[i])); src.append('машинный')
         elif not re.search('[A-Za-z]',x): out.append(x); src.append('служебное')
         else: out.append(x); src.append('англ.')
-    if f=='rf3mc.eng':   # слишком длинные строки диалогов переносим под ширину окна
+    if f=='rf3mc.eng':   # строки из 3DS (окно на 40 символов) растягиваем под широкое окно ПК
+        for i,x in enumerate(out):
+            if src[i] in ('3DS','3DS≈') and '\n' in x and '%' not in x and '＋[' not in x and '／' not in x:
+                y=wrap_to(x,BOX)
+                if y.count('\n')<x.count('\n'): out[i]=y
         for i,x in enumerate(out):
             if '%' not in x and any(dlen(l)>BOX+4 and ' ' in l for l in x.split('\n')):
                 out[i]='\n'.join(wrap_to(l,BOX) if dlen(l)>BOX+4 else l for l in x.split('\n'))
+    if f in DESC:   # окна описаний на ПК уже: переносим под ~50 символов
+        for i,x in enumerate(out):
+            if '%' not in x and any(dlen(l)>DESCW for l in x.split('\n')):
+                out[i]=wrap_to(x,DESCW)
+    if HPRP:        # на панели Steam (мод #121) написано ОЗ/ОР
+        out=[re.sub(r'(?<![A-Za-z])HP(?![A-Za-z])','ОЗ',re.sub(r'(?<![A-Za-z])RP(?![A-Za-z])','ОР',x)) for x in out]
     write_eng(os.path.join(OUT,f),b'TEXT',out)
     assert read_eng(os.path.join(OUT,f))[1]==out
     wb=openpyxl.Workbook(); ws=wb.active; ws.title=f[:-4][:31]
