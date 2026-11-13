@@ -15,6 +15,7 @@
 ## Готовый патч для Luma3DS
 
 Архив `patch/RF4_RUS_Luma_EUR.zip` нужен для европейской версии игры из eShop (CTR-N-AR4Z, TitleID `000400000014A700`).
+Тот же архив на Google Диске: https://drive.google.com/file/d/11bo-ZsHQZQtf8nayfWKw-e7XrIc4m6Un/view?usp=drivesdk
 
 1. Скопируйте папку `luma` из архива в корень SD-карты. Должно получиться `SD:/luma/titles/000400000014A700/romfs/...`.
 2. Включите консоль с зажатой **SELECT**, отметьте **Enable game patching** и сохраните (START).

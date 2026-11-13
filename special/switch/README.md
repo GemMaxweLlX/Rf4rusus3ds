@@ -5,6 +5,8 @@
 ## Готовый патч
 
 `patch/RF4S_RUS_Switch.zip` — папка `atmosphere/contents/010051D00E3A4000/romfs` для Atmosphere (LayeredFS) и инструкция `INSTALL_RU.txt`.
+Тот же архив на Google Диске: https://drive.google.com/file/d/1Vkk9qOtxDqbVvPTjuCC0F1NMSSYp6zoz/view?usp=drivesdk
+
 Папку `atmosphere` нужно скопировать в корень SD-карты. Игру запускать на английском языке.
 
 Файлы сверены с версией USA (TitleID `010051D00E3A4000`, обновление v65536).
