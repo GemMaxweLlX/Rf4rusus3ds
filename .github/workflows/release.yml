@@ -1,0 +1,31 @@
+name: Publish release
+
+# Запуск вручную: Actions -> Publish release -> Run workflow, указать дату папки из releases/.
+on:
+  workflow_dispatch:
+    inputs:
+      date:
+        description: "Папка релиза в releases/ (ГГГГ-ММ-ДД)"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DATE: ${{ inputs.date }}
+        run: |
+          set -e
+          dir="releases/$DATE"
+          test -d "$dir"
+          notes="$dir/NOTES.md"
+          gh release create "v$DATE" "$dir"/*.zip \
+            --title "Русский перевод RF4 — $DATE" \
+            --notes-file "$notes" \
+            --target "$GITHUB_SHA"
