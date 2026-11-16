@@ -193,6 +193,8 @@ for f in sorted(os.listdir(SP_EN)):
         for i,x in enumerate(out):
             if '%' not in x and any(dlen(l)>DESCW for l in x.split('\n')):
                 out[i]=wrap_to(x,DESCW)
+    # ''…'' игра сама показывает как кавычки, вложенные «…» дают двойные кавычки
+    out=[re.sub(r"»([.!?…,]*)''",r"\1''",re.sub(r"''«","''",x)) for x in out]
     if HPRP:        # на панели Steam (мод #121) написано ОЗ/ОР
         out=[re.sub(r'(?<![A-Za-z])HP(?![A-Za-z])','ОЗ',re.sub(r'(?<![A-Za-z])RP(?![A-Za-z])','ОР',x)) for x in out]
     write_eng(os.path.join(OUT,f),b'TEXT',out)

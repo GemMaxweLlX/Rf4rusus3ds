@@ -26,6 +26,26 @@ TAB = os.path.join(ROOT, 'special', 'switch', 'tables')
 TR = os.path.join(ROOT, 'special', 'switch', 'tr')
 os.makedirs(TAB, exist_ok=True)
 
+SW_DESC = {'rf3TxtItem_split2_2.eng', 'rf3TxtSkill_split2_2.eng', 'rf3TxtNpc_split2_2.eng',
+           'rf3TxtQuest_split3_3.eng', 'rf4TxtQuestRequestDetailFormat_split2_2.eng'}
+TAGW = re.compile(r'＠‡([^,＠]*),([^＠]*)＠|＠[^＠]*＠')
+def swlen(s):
+    def tw(m):   # примерная ширина подстановки: названия мест и предметов длинные
+        if m.group(1) is not None: return 'x' * max(len(m.group(1)), len(m.group(2)))
+        t = m.group(0)
+        return 'x' * (22 if 'マップ' in t else 16 if 'アイテム' in t else 8)
+    s = TAGW.sub(tw, s)
+    return len(s.replace('＋', '').replace("''", '"'))
+def swwrap(t, W):
+    lines, cur = [], ''
+    for w in t.replace('\n', ' ').split(' '):
+        if not w: continue
+        c = (cur + ' ' + w) if cur else w
+        if cur and swlen(c) > W: lines.append(cur); cur = w
+        else: cur = c
+    if cur: lines.append(cur)
+    return '\n'.join(lines)
+
 def n2(x):
     return re.sub(r'\s+', ' ', x.replace('\r', '')).strip()
 
@@ -67,6 +87,14 @@ for f in sorted(files):
         elif i in pair:   # на Switch панель английская: ОЗ/ОР из Steam-перевода обратно в HP/RP
             out.append(re.sub('(?<![А-Яа-яЁё])ОЗ(?![А-Яа-яЁё])', 'HP', re.sub('(?<![А-Яа-яЁё])ОР(?![А-Яа-яЁё])', 'RP', st_ru[pair[i]]))); src.append('Steam')
         else: out.append(raw[i]); src.append(rawsrc[i])
+    # на Switch шрифт крупнее: реплики до 56 символов в строке, описания до 44
+    W = 56 if f == 'rf3mc.eng' else (44 if f in SW_DESC else None)
+    if W:
+        for i, x in enumerate(out):
+            if '%' in x or not any(swlen(l) > W for l in x.split('\n')): continue
+            y = '\n'.join(swwrap(l, W) if swlen(l) > W else l for l in x.split('\n'))
+            if f == 'rf3mc.eng' and y.count('\n') > 2: y = swwrap(x, W)
+            out[i] = y
     p = os.path.join(OUT, files[f]); os.makedirs(os.path.dirname(p), exist_ok=True)
     write_eng(p, b'TEXT', out)
     assert read_eng(p)[1] == out
