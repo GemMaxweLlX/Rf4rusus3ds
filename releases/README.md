@@ -16,6 +16,13 @@
 - Убраны двойные кавычки ''«…»'' в цитатах и письмах (Steam и Switch).
 - Switch: реплики переносятся под более крупный шрифт (до 56 символов), описания предметов, навыков и заказов — до 44 символов, ничего не уходит за край.
 
+Google Диск:
+- 3DS: https://drive.google.com/file/d/1hCqLdCGwvMsPD9y_jmrCNLnNMo_J1nYT/view?usp=drive_link
+- Steam: https://drive.google.com/file/d/152u5LI8VqJ3ae7MU5Wd9xKa5awDJCYMk/view?usp=drive_link
+- Switch: https://drive.google.com/file/d/1VMZPXM8WyjwGaIMWIei5Cn1g5I8EWHhb/view?usp=drive_link
+
+Релиз на GitHub: https://github.com/GemMaxweLlX/Rf4rusus3ds/releases/tag/v2026-11-16
+
 ## 2026-11-13
 
 - Переведена 41 реплика, где перевод был наполовину английским.
