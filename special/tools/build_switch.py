@@ -17,6 +17,7 @@ import sys, os, re, difflib, subprocess, tempfile, shutil, collections
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, os.path.join(ROOT, 'tools'))
 from rf4s_txt import read_eng, write_eng
+from typo_ru import fix as typo_fix
 import openpyxl
 
 SW, ST_EN, DS_EN = sys.argv[1:4]
@@ -83,7 +84,7 @@ for f in sorted(files):
             for k in range(a2 - a1): pair[a1 + k] = b1 + k
     out, src = [], []
     for i, x in enumerate(sw):
-        if i in edits: out.append(edits[i]); src.append('правка Switch')
+        if i in edits: out.append(typo_fix(edits[i])); src.append('правка Switch')
         elif i in pair:   # на Switch панель английская: ОЗ/ОР из Steam-перевода обратно в HP/RP
             out.append(re.sub('(?<![А-Яа-яЁё])ОЗ(?![А-Яа-яЁё])', 'HP', re.sub('(?<![А-Яа-яЁё])ОР(?![А-Яа-яЁё])', 'RP', st_ru[pair[i]]))); src.append('Steam')
         else: out.append(raw[i]); src.append(rawsrc[i])

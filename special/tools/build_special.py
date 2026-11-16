@@ -14,6 +14,7 @@ import sys,os,re,difflib,json,textwrap,collections
 ROOT=os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0,os.path.join(ROOT,'tools'))
 from rf4s_txt import read_eng,write_eng,read_txt
+from typo_ru import fix as typo_fix
 import openpyxl
 
 SP_EN,DS_TEXT_EN=sys.argv[1],sys.argv[2]
@@ -181,6 +182,7 @@ for f in sorted(os.listdir(SP_EN)):
         elif mt is not None and mt[i]: out.append(gloss(mt[i])); src.append('машинный')
         elif not re.search('[A-Za-z]',x): out.append(x); src.append('служебное')
         else: out.append(x); src.append('англ.')
+    out=[typo_fix(x) for x in out]   # типографика: знаки, дефисы в звукоподражаниях, ё, кавычки
     if f=='rf3mc.eng':   # строки из 3DS (окно на 40 символов) растягиваем под широкое окно ПК
         for i,x in enumerate(out):
             if src[i] in ('3DS','3DS≈') and '\n' in x and '%' not in x and '＋[' not in x and '／' not in x:
