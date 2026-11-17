@@ -7,7 +7,27 @@ from PIL import Image, ImageDraw, ImageFont, ImageFilter
 FONT_DIR = '/usr/share/fonts/opentype/inter/'
 FONTS = {'black': FONT_DIR + 'Inter-Black.otf', 'xbold': FONT_DIR + 'Inter-ExtraBold.otf',
          'bold': FONT_DIR + 'Inter-Bold.otf', 'medium': FONT_DIR + 'Inter-Medium.otf', 'semibold': FONT_DIR + 'Inter-SemiBold.otf'}
-SS = 8  # сглаживание: рисуем в 8 раз крупнее и уменьшаем
+SS = 8  # рисуем в 8 раз крупнее и уменьшаем
+CRISP_MIN = 8
+CRISP = True  # чёткие пиксельные буквы, как в оригинале (без полупрозрачной каймы)
+
+
+def crisp(img, color, stroke):
+    """Убрать сглаживание: каждый пиксель - либо цвет буквы, либо цвет обводки, либо прозрачный."""
+    if not CRISP:
+        return img
+    px = img.load()
+    cl = sum(color[:3]); sl = sum(stroke[:3])
+    for y in range(img.height):
+        for x in range(img.width):
+            r, g, b, a = px[x, y]
+            if a < 128:
+                px[x, y] = (0, 0, 0, 0)
+            elif stroke[3] == 0 or abs(r + g + b - cl) <= abs(r + g + b - sl) * 1.6:   # спорные пиксели - букве
+                px[x, y] = (color[0], color[1], color[2], 255)
+            else:
+                px[x, y] = (stroke[0], stroke[1], stroke[2], 255)
+    return img
 
 
 def fill_columns(im, box, src_x):
@@ -60,6 +80,8 @@ def text_layer(size, box, text, color=(255, 255, 255, 255), stroke=(20, 40, 40, 
         sx = max(max_squeeze, bw / tw_px)
     nw, nh = max(1, round(tw_px * sx)), max(1, round(th_px))
     small = big.resize((nw, nh), Image.LANCZOS)
+    if cap >= CRISP_MIN:   # мелкий текст (<8 px) чётким не делаем - буквы ломаются
+        small = crisp(small, color, stroke)
     layer = Image.new('RGBA', size, (0, 0, 0, 0))
     if align == 'center': px = x0 + (bw - nw) // 2
     elif align == 'left': px = x0
@@ -187,7 +209,7 @@ def draw_arc_text(im, center, radius, text, height, color, stroke, stroke_w=1.2,
         l, t, r, b = f.getbbox(ch, stroke_width=sw)
         big = Image.new('RGBA', (r - l + 2, b - t + 2), (0, 0, 0, 0))
         ImageDraw.Draw(big).text((-l + 1, -t + 1), ch, font=f, fill=color, stroke_width=sw, stroke_fill=stroke)
-        small = big.resize((max(1, round((r - l + 2) / SS)), max(1, round((b - t + 2) / SS))), Image.LANCZOS)
+        small = crisp(big.resize((max(1, round((r - l + 2) / SS)), max(1, round((b - t + 2) / SS))), Image.LANCZOS), color, stroke)
         small = small.rotate(-math.degrees(a), resample=Image.BICUBIC, expand=True)
         px_ = cx + radius * math.sin(a); py_ = cy - radius * math.cos(a)
         im.alpha_composite(small, (round(px_ - small.width / 2), round(py_ - small.height / 2)))
@@ -218,7 +240,7 @@ def draw_smile_text(im, center, radius, a0, a1, text, height, color, stroke, str
     cx, cy = center
     for g, w in zip(glyphs, widths):
         a = ang + w / rc / 2
-        rg = g.rotate(math.degrees(a), resample=Image.BICUBIC, expand=True)
+        rg = crisp(g.rotate(math.degrees(a), resample=Image.BICUBIC, expand=True), color, stroke)
         px_ = cx + rc * math.sin(a); py_ = cy + rc * math.cos(a)
         im.alpha_composite(rg, (round(px_ - rg.width / 2), round(py_ - rg.height / 2)))
         ang += (w + gap) / rc

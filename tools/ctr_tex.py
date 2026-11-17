@@ -87,7 +87,7 @@ def etc1_decode_block(v):
 
 import numpy as np
 _TAB = np.array([[a, b, -a, -b] for a, b in ETC_TAB])            # (8,4)
-_R = 3
+_R = 4
 _OFF = np.array([(i, j, k) for i in range(-_R, _R + 1) for j in range(-_R, _R + 1) for k in range(-_R, _R + 1)])
 
 
@@ -108,10 +108,18 @@ def _sub_errors(P, q, bits):
     return e[n, t], t, idx[n, t]
 
 
-def _cands(avg, bits):
+def _cands(avg, bits, P=None):
+    """Кандидаты базового цвета: вокруг среднего и вокруг середины между самым тёмным и самым светлым
+    пикселем подблока (так лучше передаются контрастные края букв)."""
     mx = (1 << bits) - 1
-    q0 = np.clip(np.round(avg * mx / 255).astype(int), 0, mx)
-    return np.unique(np.clip(q0[None, :] + _OFF, 0, mx), axis=0)
+    centers = [avg]
+    if P is not None:
+        l = P.sum(1); centers.append((P[l.argmin()] + P[l.argmax()]) / 2)
+    qs = []
+    for c in centers:
+        q0 = np.clip(np.round(np.asarray(c) * mx / 255).astype(int), 0, mx)
+        qs.append(np.clip(q0[None, :] + _OFF, 0, mx))
+    return np.unique(np.concatenate(qs), axis=0)
 
 
 def etc1_encode_block(px):
@@ -124,13 +132,13 @@ def etc1_encode_block(px):
         # индивидуальный режим: подблоки независимы
         r = []
         for P in Ps:
-            q = _cands(P.mean(0), 4); e, t, idx = _sub_errors(P, q, 4); i = e.argmin()
+            q = _cands(P.mean(0), 4, P); e, t, idx = _sub_errors(P, q, 4); i = e.argmin()
             r.append((e[i], q[i], t[i], idx[i]))
         err = r[0][0] + r[1][0]
         if best is None or err < best[0]:
             best = (err, flip, 0, r, subs)
         # разностный режим: 5 бит, разность второго цвета -4..3
-        q0 = _cands(Ps[0].mean(0), 5); q1 = _cands(Ps[1].mean(0), 5)
+        q0 = _cands(Ps[0].mean(0), 5, Ps[0]); q1 = _cands(Ps[1].mean(0), 5, Ps[1])
         e0, t0, i0 = _sub_errors(Ps[0], q0, 5); e1, t1, i1 = _sub_errors(Ps[1], q1, 5)
         d = q1[None, :, :] - q0[:, None, :]
         ok = ((d >= -4) & (d <= 3)).all(-1)
