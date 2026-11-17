@@ -11,6 +11,7 @@ import ctr_tex
 from tex_ru import *
 
 SRC = None
+PC_CAL = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'textures', 'pc_calendar')
 JOBS = []   # (относительный путь, имя текстуры, поворот, функция)
 
 
@@ -67,15 +68,30 @@ for path, name, t, x0 in SORT:
 
 
 # ---------- розовые/синие кнопки магазина и кузницы 64x32 (Y BUY, X RESET, A Skip)
-for path, name, t in (('menu/shop_button.bcmdl', 'shop_button_buy_%s_00', 'КУПИТЬ'),
-                      ('menu/shop_button.bcmdl', 'shop_button_reset_%s_00', 'СБРОС'),
-                      ('menu/synthesis_button.bcmdl', 'synthesis_button_dialogSkip_%s_00', 'Пропуск')):
+# Стираем только буквы (белые + их тень), каждую строку заливаем цветом тела кнопки из этой же строки;
+# закруглённый край кнопки не трогаем. Русский текст белый, без чёрной обводки, как в оригинале.
+def body_fill(im, mask, x0, x1):
+    px = im.load()
+    for y in {p[1] for p in mask}:
+        bg = [px[x, y] for x in range(x0, x1) if (x, y) not in mask and px[x, y][3] > 230]
+        if not bg: continue
+        bg.sort(key=lambda p: sum(p[:3])); mid = bg[len(bg) // 2]
+        for x in range(x0, x1):
+            if (x, y) in mask: px[x, y] = mid
+    return im
+
+
+for path, name, t, shade in (('menu/shop_button.bcmdl', 'shop_button_buy_%s_00', 'КУПИТЬ', (175, 40, 95, 255)),
+                             ('menu/shop_button.bcmdl', 'shop_button_reset_%s_00', 'СБРОС', (35, 80, 160, 255)),
+                             ('menu/synthesis_button.bcmdl', 'synthesis_button_dialogSkip_%s_00', 'Пропуск', (175, 40, 95, 255))):
     for st in ('pop', 'push'):
-        def f(im, t=t):
-            x1 = right_edge(im, 11) - 3
-            fill_columns(im, (17, 2, x1, 20), 16)
-            draw_text(im, (18, 3, x1 - 1, 19), t, height=10, stroke_w=1.0, color=(255, 255, 255, 255),
-                      stroke=(120, 30, 60, 255) if 'reset' not in name else (30, 60, 120, 255), font='black', max_squeeze=0.6)
+        def f(im, t=t, shade=shade):
+            x1 = right_edge(im, 11) - 4                                   # до закругления
+            m = outlined_text_mask(im, (17, 3, x1, 20), lambda r, g, b, a: a > 200 and min(r, g, b) > 185,
+                                   lambda r, g, b, a: a > 200 and r + g + b < 360, reach=1)
+            body_fill(im, m, 17, x1)
+            draw_text(im, (18, 4, x1 - 1, 19), t, height=9.5, stroke_w=0.6, color=(255, 255, 255, 255),
+                      stroke=shade, font='xbold', max_squeeze=0.6)
         job(path, name % st, 90)(f)
 
 
@@ -238,19 +254,22 @@ for i, f in enumerate(ORDER):
     for kind in ('next', 'prev'):
         other = ORDER[(i + 1) % 4] if kind == 'next' else ORDER[(i - 1) % 4]
         for st in ('pop', 'push'):
-            def btn(im, kind=kind, ab=ABBR[other], acol=ABBR_COL[other]):
-                abox = (2, 1, 32, 25) if kind == 'next' else (7, 1, 40, 25)
-                mbox = (3, 26, 34, 39) if kind == 'next' else (15, 26, 58, 39)   # у «next» стрелка «>» остаётся своя
-                tbox = (4, 27, 33, 38) if kind == 'next' else (16, 27, 56, 38)
-                stroke = acol
-                inpaint(im, outlined_text_mask(im, abox, lambda r, g, b, a: a > 200 and min(r, g, b) > 228,
-                                               lambda r, g, b, a: a > 200 and r + g + b < 520, reach=3), iters=60)
-                draw_text(im, (abox[0] + 2, abox[1] + 2, abox[2] - 2, abox[3] - 2), ab, height=13, stroke_w=1.4,
-                          color=(255, 255, 255, 255), stroke=stroke, font='black', max_squeeze=0.6)
+            def btn(im, f=f, kind=kind, st=st):
+                # верх кнопки (фон в клетку + аббревиатура сезона + значок) берём с переведённой ПК-кнопки:
+                # там тот же рисунок и почти те же пропорции (184x74 против 61x24)
+                pc = Image.open(os.path.join(PC_CAL, f'calendar_{f}_button_{kind}_{st}_eng.png')).convert('RGBA')
+                top = pc.crop((4, 4, 184, 76)).resize((59, 23), Image.LANCZOS)
+                im.paste(top, (2, 2))
+                # нижняя полоска: «MONTH >» -> «МЕСЯЦ >», «< MONTH» -> «< МЕСЯЦ», ровно на месте английского
+                mbox = (3, 27, 37, 39) if kind == 'next' else (15, 27, 58, 39)   # стираем и стрелки «>»/«<»
                 mcol = _dark_color(im, mbox, 480)
-                inpaint(im, text_mask(im, mbox, lambda r, g, b, a: a > 200 and r + g + b < 520, grow=1), iters=40)
-                draw_text(im, tbox, 'МЕСЯЦ' if kind == 'next' else '< МЕСЯЦ', height=7, stroke_w=0,
-                          color=mcol, stroke=(0, 0, 0, 0), font='xbold', max_squeeze=0.7)
+                inpaint(im, text_mask(im, mbox, lambda r, g, b, a: a > 200 and r + g + b < 560, grow=1), iters=40)
+                # стрелки «>» / «<» светлее букв - стираем отдельно с более мягким порогом
+                abox = (36, 27, 42, 39) if kind == 'next' else (15, 27, 22, 39)
+                inpaint(im, text_mask(im, abox, lambda r, g, b, a: a > 200 and r + g + b < 650, grow=1), iters=40)
+                draw_text(im, (4, 28, 35, 38) if kind == 'next' else (16, 28, 57, 38), 'МЕСЯЦ',
+                          height=7.5, stroke_w=0, color=mcol, stroke=(0, 0, 0, 0), font='bold', max_squeeze=0.75,
+                          align='left' if kind == 'next' else 'center')
             job(f'menu/calendar_{f}.bcmdl', f'calendar_{f}_button_{kind}_{st}_00', 90)(btn)
 
 
