@@ -6,7 +6,7 @@ from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
 FONT_DIR = '/usr/share/fonts/opentype/inter/'
 FONTS = {'black': FONT_DIR + 'Inter-Black.otf', 'xbold': FONT_DIR + 'Inter-ExtraBold.otf',
-         'bold': FONT_DIR + 'Inter-Bold.otf', 'semibold': FONT_DIR + 'Inter-SemiBold.otf'}
+         'bold': FONT_DIR + 'Inter-Bold.otf', 'medium': FONT_DIR + 'Inter-Medium.otf', 'semibold': FONT_DIR + 'Inter-SemiBold.otf'}
 SS = 8  # сглаживание: рисуем в 8 раз крупнее и уменьшаем
 
 

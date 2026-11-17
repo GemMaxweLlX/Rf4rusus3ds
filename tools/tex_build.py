@@ -96,18 +96,21 @@ for path, name, t, shade in (('menu/shop_button.bcmdl', 'shop_button_buy_%s_00',
 
 
 # ---------- категории в меню дружбы 64x32 (PPL, MON): жёлтая (pop) и бирюзовая (push) кнопки
+# Буквы стираем построчно цветом тела кнопки (как у кнопок магазина), текст ставим ниже - по строке оригинала.
 for name, t in (('campmenu_friendship_button_category_npc_%s_00', 'ЛЮДИ'), ('campmenu_friendship_button_category_monster_%s_00', 'ЗВЕРИ')):
     for st in ('pop', 'push'):
-        def f(im, t=t, st=st):
-            x1 = right_edge(im, 14) - 3
+        def f(im, t=t, st=st, name=name):
+            x1 = right_edge(im, 14) - 4
+            x0 = 23 if 'monster' in name else 25
             if st == 'pop':
-                text = lambda r, g, b, a: b > 120 or (r + g + b) < 300
-                col, stroke = (255, 250, 225, 255), (150, 105, 30, 255)
+                fill = lambda r, g, b, a: a > 200 and b > 115
+                col, stroke = (255, 250, 228, 255), (165, 115, 35, 255)
             else:
-                text = lambda r, g, b, a: min(r, g, b) > 150 or (r + g + b) < 210
-                col, stroke = (255, 255, 255, 255), (20, 50, 60, 255)
-            erase_text_by_column(im, (24 if 'monster' in name else 26, 6, x1, 20), text)
-            draw_text(im, (28, 6, x1, 20), t, height=8, stroke_w=0.9, color=col, stroke=stroke, font='black', max_squeeze=0.6)
+                fill = lambda r, g, b, a: a > 200 and min(r, g, b) > 150
+                col, stroke = (255, 255, 255, 255), (25, 60, 70, 255)
+            m = outlined_text_mask(im, (x0, 5, x1, 21), fill, lambda r, g, b, a: a > 200 and r + g + b < 330, reach=2)
+            body_fill(im, m, x0, x1)
+            draw_text(im, (x0 + 3, 8, x1, 20), t, height=8, stroke_w=0.8, color=col, stroke=stroke, font='black', max_squeeze=0.6)
         job('menu/campmenu_friendship_button_category.bcmdl', name % st, 90)(f)
 
 
@@ -157,14 +160,18 @@ for name, t, stroke in (('nameEntry_button_backspace_%s_00', 'СТЕРЕТЬ', (
 
 
 # ---------- подсказка на экране ввода имени 128x64 (L R INPUT / START ENTER / Y SWITCH)
+# Стираем буквы построчно цветом полоски (розовой или серой), текст вписываем до закругления справа.
 for name in ('nameEntry_help_kanjiEnable_00', 'nameEntry_help_kanjiDisable_00'):
     def f(im, name=name):
-        for (y0, y1), t in (((2, 19), 'НАБОР'), ((22, 40), 'ГОТОВО'), ((43, 61), 'СМЕНА')):
-            text = lambda r, g, b, a: min(r, g, b) > 150 or (r > 225 and g > 160 and b > 170)
-            erase_text_by_column(im, (33, y0, 94, y1), text)
+        for (y0, y1), t in (((2, 20), 'НАБОР'), ((22, 41), 'ГОТОВО'), ((43, 62), 'СМЕНА')):
+            x1 = right_edge(im, (y0 + y1) // 2) - 5
             grey = 'Disable' in name and y0 == 43
-            draw_text(im, (40, y0 + 1, 92, y1 - 1), t, height=11, stroke_w=0.9, color=(255, 255, 255, 255),
-                      stroke=(120, 120, 120, 255) if grey else (150, 30, 70, 255), font='black', max_squeeze=0.7)
+            hi, lo = (165, 130) if grey else (95, 38)      # светлые буквы и их тень относительно цвета полоски
+            m = outlined_text_mask(im, (33, y0 + 2, x1, y1 - 2), lambda r, g, b, a, hi=hi: a > 150 and min(r, g, b) > hi,
+                                   lambda r, g, b, a, lo=lo: a > 150 and min(r, g, b) < lo, reach=2)
+            body_fill(im, m, 33, x1)
+            draw_text(im, (42, y0 + 4, x1 - 2, y1 - 3), t, height=10, stroke_w=0.7, color=(255, 255, 255, 255),
+                      stroke=(130, 130, 130, 255) if grey else (175, 45, 95, 255), font='xbold', max_squeeze=0.6)
     job('menu/nameEntry.bcmdl', name, 90)(f)
 
 
@@ -191,11 +198,12 @@ def _(im):
 @job('menu/synthesis.bcmdl', 'synthesis_material6_00', 90)
 def _(im):
     b1 = rbox((36, 4, 50, 50), 128)                         # «RP Used»
-    erase_text_by_row(im, b1, lambda r, g, b, a: (r + g + b) < 500)
-    draw_text(im, b1, 'Расход RP', height=9, stroke_w=0, color=(60, 60, 60, 255), stroke=(0, 0, 0, 0), font='semibold', max_squeeze=0.75)
+    inpaint(im, text_mask(im, b1, lambda r, g, b, a: a > 150 and (r + g + b) < 600, grow=1), iters=40)
+    draw_text(im, b1, 'Расход RP', height=8.5, stroke_w=0, color=(70, 70, 70, 255), stroke=(0, 0, 0, 0), font='medium', max_squeeze=0.75, align='left')
     b2 = rbox((97, 1, 114, 48), 128)                        # «Materials» голубым
     erase_text_by_row(im, b2, lambda r, g, b, a: b - r > 40 and r < 200)
-    draw_text(im, b2, 'Материалы', height=8.5, stroke_w=0, color=(90, 160, 210, 255), stroke=(0, 0, 0, 0), font='bold', max_squeeze=0.75)
+    draw_text(im, (b2[0] + 1, b2[1], b2[2] - 2, b2[3]), 'Материалы', height=7.5, stroke_w=0, color=(90, 160, 210, 255),
+              stroke=(0, 0, 0, 0), font='bold', max_squeeze=0.45)
     b3 = rbox((65, 29, 79, 49), 128)                        # «Pcs.»
     erase_text_by_row(im, b3, lambda r, g, b, a: g - r > 25 and g - b > 10)
     draw_text(im, b3, 'шт.', height=6, stroke_w=0, color=(80, 160, 80, 255), stroke=(0, 0, 0, 0), font='bold', max_squeeze=0.8)
