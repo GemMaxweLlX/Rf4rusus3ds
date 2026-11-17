@@ -70,10 +70,13 @@ for path, name, t, x0 in SORT:
 # ---------- розовые/синие кнопки магазина и кузницы 64x32 (Y BUY, X RESET, A Skip)
 # Стираем только буквы (белые + их тень), каждую строку заливаем цветом тела кнопки из этой же строки;
 # закруглённый край кнопки не трогаем. Русский текст белый, без чёрной обводки, как в оригинале.
-def body_fill(im, mask, x0, x1):
+def body_fill(im, mask, x0, x1, left=True):
     px = im.load()
     for y in {p[1] for p in mask}:
         bg = [px[x, y] for x in range(x0, x1) if (x, y) not in mask and px[x, y][3] > 230]
+        if len(bg) < 3:   # вся строка занята буквами - берём фон сразу за краями области
+            side = (list(range(max(0, x0 - 3), x0)) if left else []) + list(range(x1, min(im.width, x1 + 2)))
+            bg = [px[x, y] for x in side if px[x, y][3] > 230] or bg   # left=False: слева значок, берём только справа
         if not bg: continue
         bg.sort(key=lambda p: sum(p[:3])); mid = bg[len(bg) // 2]
         for x in range(x0, x1):
@@ -109,7 +112,7 @@ for name, t in (('campmenu_friendship_button_category_npc_%s_00', 'ЛЮДИ'), (
                 fill = lambda r, g, b, a: a > 200 and min(r, g, b) > 150
                 col, stroke = (255, 255, 255, 255), (25, 60, 70, 255)
             m = outlined_text_mask(im, (x0, 5, x1, 21), fill, lambda r, g, b, a: a > 200 and r + g + b < 330, reach=2)
-            body_fill(im, m, x0, x1)
+            body_fill(im, m, x0, x1, left=False)
             draw_text(im, (x0 + 3, 8, x1, 20), t, height=8, stroke_w=0.8, color=col, stroke=stroke, font='black', max_squeeze=0.6)
         job('menu/campmenu_friendship_button_category.bcmdl', name % st, 90)(f)
 
@@ -164,13 +167,13 @@ for name, t, stroke in (('nameEntry_button_backspace_%s_00', 'СТЕРЕТЬ', (
 for name in ('nameEntry_help_kanjiEnable_00', 'nameEntry_help_kanjiDisable_00'):
     def f(im, name=name):
         for (y0, y1), t in (((2, 20), 'НАБОР'), ((22, 41), 'ГОТОВО'), ((43, 62), 'СМЕНА')):
-            x1 = right_edge(im, (y0 + y1) // 2) - 5
+            x1 = right_edge(im, (y0 + y1) // 2) - 3
             grey = 'Disable' in name and y0 == 43
-            hi, lo = (165, 130) if grey else (95, 38)      # светлые буквы и их тень относительно цвета полоски
-            m = outlined_text_mask(im, (33, y0 + 2, x1, y1 - 2), lambda r, g, b, a, hi=hi: a > 150 and min(r, g, b) > hi,
+            hi, lo = (165, 130) if grey else (85, 38)      # светлые буквы и их тень относительно цвета полоски
+            m = outlined_text_mask(im, (36, y0 + 2, x1, y1 - 2), lambda r, g, b, a, hi=hi: a > 150 and min(r, g, b) > hi,
                                    lambda r, g, b, a, lo=lo: a > 150 and min(r, g, b) < lo, reach=2)
-            body_fill(im, m, 33, x1)
-            draw_text(im, (42, y0 + 4, x1 - 2, y1 - 3), t, height=10, stroke_w=0.7, color=(255, 255, 255, 255),
+            body_fill(im, m, 36, x1)                        # клавиши L/R/START заканчиваются на x=34
+            draw_text(im, (42, y0 + 4, x1 - 4, y1 - 3), t, height=10, stroke_w=0.7, color=(255, 255, 255, 255),
                       stroke=(130, 130, 130, 255) if grey else (175, 45, 95, 255), font='xbold', max_squeeze=0.6)
     job('menu/nameEntry.bcmdl', name, 90)(f)
 
