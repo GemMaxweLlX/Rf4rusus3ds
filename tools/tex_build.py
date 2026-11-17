@@ -111,7 +111,7 @@ for name, t in (('campmenu_friendship_button_category_npc_%s_00', 'ЛЮДИ'), (
             else:
                 fill = lambda r, g, b, a: a > 200 and min(r, g, b) > 150
                 col, stroke = (255, 255, 255, 255), (25, 60, 70, 255)
-            m = outlined_text_mask(im, (x0, 5, x1, 21), fill, lambda r, g, b, a: a > 200 and r + g + b < 330, reach=2)
+            m = outlined_text_mask(im, (x0, 7, x1 - 3, 21), fill, lambda r, g, b, a: a > 200 and r + g + b < 330, reach=2)   # верх с углом не трогаем
             body_fill(im, m, x0, x1, left=False)
             draw_text(im, (x0 + 3, 8, x1, 20), t, height=8, stroke_w=0.8, color=col, stroke=stroke, font='black', max_squeeze=0.6)
         job('menu/campmenu_friendship_button_category.bcmdl', name % st, 90)(f)
@@ -163,17 +163,22 @@ for name, t, stroke in (('nameEntry_button_backspace_%s_00', 'СТЕРЕТЬ', (
 
 
 # ---------- подсказка на экране ввода имени 128x64 (L R INPUT / START ENTER / Y SWITCH)
-# Стираем буквы построчно цветом полоски (розовой или серой), текст вписываем до закругления справа.
+# Полоска - ровный градиент сверху вниз, одинаковый по всей длине. Поэтому область под английским словом
+# закрашиваем копией чистого столбца этой же полоски (x=38: между клавишей и словом) - блики и тени сохраняются.
 for name in ('nameEntry_help_kanjiEnable_00', 'nameEntry_help_kanjiDisable_00'):
     def f(im, name=name):
-        for (y0, y1), t in (((2, 20), 'НАБОР'), ((22, 41), 'ГОТОВО'), ((43, 62), 'СМЕНА')):
-            x1 = right_edge(im, (y0 + y1) // 2) - 3
+        # (строки, слово, начало закраски, чистый столбец): у SWITCH слово начинается раньше (x=37)
+        for (y0, y1), t, fx, fx1, src in (((2, 21), 'НАБОР', 36, 88, 38), ((22, 42), 'ГОТОВО', 36, 88, 38),
+                                          ((43, 63), 'СМЕНА', 33, 88, 32)):
             grey = 'Disable' in name and y0 == 43
-            hi, lo = (165, 130) if grey else (85, 38)      # светлые буквы и их тень относительно цвета полоски
-            m = outlined_text_mask(im, (36, y0 + 2, x1, y1 - 2), lambda r, g, b, a, hi=hi: a > 150 and min(r, g, b) > hi,
-                                   lambda r, g, b, a, lo=lo: a > 150 and min(r, g, b) < lo, reach=2)
-            body_fill(im, m, 36, x1)                        # клавиши L/R/START заканчиваются на x=34
-            draw_text(im, (42, y0 + 4, x1 - 4, y1 - 3), t, height=10, stroke_w=0.7, color=(255, 255, 255, 255),
+            fill_columns(im, (fx, y0, fx1, y1), src)
+            # хвост последней буквы на закруглении: меняем только светлые пиксели, форму края не трогаем
+            px = im.load()
+            for x in range(fx1, fx1 + 4):
+                for y in range(y0 + 3, y1 - 3):
+                    if px[x, y][3] > 200 and min(px[x, y][:3]) > (175 if grey else 120):
+                        px[x, y] = px[src, y]
+            draw_text(im, (42, y0 + 4, 86, y1 - 4), t, height=10, stroke_w=0.7, color=(255, 255, 255, 255),
                       stroke=(130, 130, 130, 255) if grey else (175, 45, 95, 255), font='xbold', max_squeeze=0.6)
     job('menu/nameEntry.bcmdl', name, 90)(f)
 
