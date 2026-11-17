@@ -204,17 +204,18 @@ def _(im):
     draw_text(im, b, 'Результат', height=8.5, stroke_w=0, color=(255, 250, 240, 255), stroke=(0, 0, 0, 0), font='bold', max_squeeze=0.75)
 
 
-# ---------- календарь: название сезона на листе (верхний экран, 512x256 после поворота), надпись по дуге
-# (оригинал написан «руническим» шрифтом игры; стираем его и пишем русское название по той же дуге)
-CAL = {'0_spring': ('ВЕСНА', (40, 95, 40, 255), 252), '1_summer': ('ЛЕТО', (55, 60, 125, 255), 249),
-       '2_autumn': ('ОСЕНЬ', (115, 55, 40, 255), 251), '3_winter': ('ЗИМА', (125, 45, 90, 255), 263)}
+# ---------- календарь: название сезона на листе (верхний экран, 512x256 после поворота)
+# Оригинал написан «руническим» шрифтом вдоль нижнего края листа: дуга «улыбкой», правый край выше.
+# Дуга снята с оригинала (низ букв): окружность с центром (275, -4), радиус 68, от -14° до +41°.
+CAL = {'0_spring': ('ВЕСНА', (40, 95, 40, 255), 250), '1_summer': ('ЛЕТО', (55, 60, 125, 255), 250),
+       '2_autumn': ('ОСЕНЬ', (115, 55, 40, 255), 250), '3_winter': ('ЗИМА', (125, 45, 90, 255), 262)}
 for f, (t, stroke, x0) in CAL.items():
     def top(im, t=t, stroke=stroke, x0=x0):
         lum = lambda r, g, b: r + g + b
-        m = text_mask(im, (x0, 31, 340, 68), lambda r, g, b, a: a > 200 and (lum(r, g, b) > 590 or lum(r, g, b) < 340), grow=1)
-        inpaint(im, m, iters=100)
-        h = 11
-        draw_arc_text(im, (296, 47 + h / 2 + 110), 110, t, h, (255, 252, 245, 255), stroke, stroke_w=1.3)
+        m = outlined_text_mask(im, (x0, 30, 336, 68), lambda r, g, b, a: a > 200 and lum(r, g, b) > 575,
+                               lambda r, g, b, a: a > 200 and lum(r, g, b) < 420, reach=2)
+        inpaint(im, m, iters=80)
+        draw_smile_text(im, (275, -4), 68, -14, 41, t, 11, (255, 252, 245, 255), stroke, stroke_w=1.3)
     job(f'menu/calendar_{f}.bcmdl', f'calendar_{f}_top_00', 90)(top)
 
 
@@ -239,15 +240,16 @@ for i, f in enumerate(ORDER):
         for st in ('pop', 'push'):
             def btn(im, kind=kind, ab=ABBR[other], acol=ABBR_COL[other]):
                 abox = (2, 1, 32, 25) if kind == 'next' else (7, 1, 40, 25)
-                mbox = (3, 26, 33, 39) if kind == 'next' else (20, 26, 58, 39)   # стрелки «>»/«<» оставляем свои
-                tbox = (4, 27, 32, 38) if kind == 'next' else (21, 27, 55, 38)
+                mbox = (3, 26, 34, 39) if kind == 'next' else (15, 26, 58, 39)   # у «next» стрелка «>» остаётся своя
+                tbox = (4, 27, 33, 38) if kind == 'next' else (16, 27, 56, 38)
                 stroke = acol
-                inpaint(im, text_mask(im, abox, lambda r, g, b, a: a > 200 and (min(r, g, b) > 228 or r + g + b < 400), grow=1))
+                inpaint(im, outlined_text_mask(im, abox, lambda r, g, b, a: a > 200 and min(r, g, b) > 228,
+                                               lambda r, g, b, a: a > 200 and r + g + b < 520, reach=3), iters=60)
                 draw_text(im, (abox[0] + 2, abox[1] + 2, abox[2] - 2, abox[3] - 2), ab, height=13, stroke_w=1.4,
                           color=(255, 255, 255, 255), stroke=stroke, font='black', max_squeeze=0.6)
                 mcol = _dark_color(im, mbox, 480)
-                inpaint(im, text_mask(im, mbox, lambda r, g, b, a: a > 200 and r + g + b < 480, grow=1))
-                draw_text(im, tbox, 'МЕСЯЦ', height=7, stroke_w=0,
+                inpaint(im, text_mask(im, mbox, lambda r, g, b, a: a > 200 and r + g + b < 520, grow=1), iters=40)
+                draw_text(im, tbox, 'МЕСЯЦ' if kind == 'next' else '< МЕСЯЦ', height=7, stroke_w=0,
                           color=mcol, stroke=(0, 0, 0, 0), font='xbold', max_squeeze=0.7)
             job(f'menu/calendar_{f}.bcmdl', f'calendar_{f}_button_{kind}_{st}_00', 90)(btn)
 

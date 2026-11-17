@@ -193,3 +193,49 @@ def draw_arc_text(im, center, radius, text, height, color, stroke, stroke_w=1.2,
         im.alpha_composite(small, (round(px_ - small.width / 2), round(py_ - small.height / 2)))
         ang += w_px / radius
     return im
+
+
+def draw_smile_text(im, center, radius, a0, a1, text, height, color, stroke, stroke_w=1.2, font='black', max_gap=1.5):
+    """Текст по нижней дуге окружности (центр выше текста, дуга «улыбкой»).
+    Низ букв лежит на окружности радиуса radius; буквы равномерно распределены между углами a0..a1
+    (в градусах от направления вниз, плюс - вправо и вверх)."""
+    import math
+    f = ImageFont.truetype(FONTS[font], int(height * SS / 0.73))
+    sw = max(0, round(stroke_w * SS))
+    glyphs = []
+    for ch in text:
+        l, t, r, b = f.getbbox(ch, stroke_width=sw)
+        big = Image.new('RGBA', (r - l + 2, b - t + 2), (0, 0, 0, 0))
+        ImageDraw.Draw(big).text((-l + 1, -t + 1), ch, font=f, fill=color, stroke_width=sw, stroke_fill=stroke)
+        glyphs.append(big.resize((max(1, round((r - l + 2) / SS)), max(1, round((b - t + 2) / SS))), Image.LANCZOS))
+    rc = radius - height / 2                       # центры букв чуть ближе к центру окружности
+    widths = [g.width for g in glyphs]
+    span = math.radians(a1 - a0)
+    gap = (span * rc - sum(widths)) / max(1, len(glyphs) - 1)
+    gap = min(max(gap, 0.0), max_gap)
+    total = sum(widths) + gap * (len(glyphs) - 1)
+    ang = math.radians((a0 + a1) / 2) - total / rc / 2
+    cx, cy = center
+    for g, w in zip(glyphs, widths):
+        a = ang + w / rc / 2
+        rg = g.rotate(math.degrees(a), resample=Image.BICUBIC, expand=True)
+        px_ = cx + rc * math.sin(a); py_ = cy + rc * math.cos(a)
+        im.alpha_composite(rg, (round(px_ - rg.width / 2), round(py_ - rg.height / 2)))
+        ang += (w + gap) / rc
+    return im
+
+
+def outlined_text_mask(im, box, is_fill, is_outline, reach=2):
+    """Маска надписи «светлая заливка + тёмная обводка»: берём пиксели заливки и только те тёмные пиксели,
+    что лежат не дальше reach от заливки (чтобы не задеть контуры рисунка вокруг)."""
+    x0, y0, x1, y1 = box
+    px = im.load()
+    fill = {(x, y) for x in range(x0, x1) for y in range(y0, y1) if is_fill(*px[x, y])}
+    near = set(fill)
+    for _ in range(reach):
+        near |= {(x + dx, y + dy) for x, y in near for dx in (-1, 0, 1) for dy in (-1, 0, 1)
+                 if x0 <= x + dx < x1 and y0 <= y + dy < y1}
+    m = fill | {(x, y) for x, y in near if is_outline(*px[x, y])}
+    # плюс один пиксель сглаживания вокруг
+    return m | {(x + dx, y + dy) for x, y in m for dx in (-1, 0, 1) for dy in (-1, 0, 1)
+                if x0 <= x + dx < x1 and y0 <= y + dy < y1 and (x + dx, y + dy) in near}
