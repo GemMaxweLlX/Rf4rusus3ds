@@ -324,6 +324,21 @@ def _(im):
               font='black', max_squeeze=0.7)
 
 
+# ---------- ручные правки: готовые PNG из textures/manual (имя файла = имя текстуры, вид как после поворота на 90°)
+MANUAL = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'textures', 'manual')
+if os.path.isdir(MANUAL):
+    for fn_ in sorted(os.listdir(MANUAL)):
+        if not fn_.endswith('.png'): continue
+        nm = fn_[:-4]
+        hits = [j for j in JOBS if j[1] == nm]
+        if not hits: continue
+        path_ = hits[0][0]
+        JOBS[:] = [j for j in JOBS if j[1] != nm]
+        def man(im, f=os.path.join(MANUAL, fn_)):
+            im.paste(Image.open(f).convert('RGBA'), (0, 0))
+        JOBS.append((path_, nm, 90, man))
+
+
 def _fwd(im, rot):
     if rot == 'TV': return im.transpose(Image.TRANSVERSE)
     return im.rotate(rot, expand=True) if rot else im
