@@ -262,12 +262,22 @@ for i, f in enumerate(ORDER):
                 im.paste(top, (2, 2))
                 # нижняя полоска: «MONTH >» -> «МЕСЯЦ >», «< MONTH» -> «< МЕСЯЦ», ровно на месте английского
                 mbox = (3, 27, 37, 39) if kind == 'next' else (15, 27, 58, 39)   # стираем и стрелки «>»/«<»
-                mcol = _dark_color(im, mbox, 480)
-                inpaint(im, text_mask(im, mbox, lambda r, g, b, a: a > 200 and r + g + b < 560, grow=1), iters=40)
-                # стрелки «>» / «<» светлее букв - стираем отдельно с более мягким порогом
-                abox = (36, 27, 42, 39) if kind == 'next' else (15, 27, 22, 39)
-                inpaint(im, text_mask(im, abox, lambda r, g, b, a: a > 200 and r + g + b < 650, grow=1), iters=40)
-                draw_text(im, (4, 28, 35, 38) if kind == 'next' else (16, 28, 57, 38), 'МЕСЯЦ',
+                # порог - относительно фона полоски (у нажатой кнопки всё светлее)
+                px = im.load()
+                lum = lambda p: p[0] + p[1] + p[2]
+                strip = sorted(lum(px[x, y]) for x in range(mbox[0], mbox[2]) for y in range(mbox[1], mbox[3]) if px[x, y][3] > 200)
+                bgl = strip[len(strip) * 3 // 4]
+                is_txt = lambda r, g, b, a: a > 200 and r + g + b < bgl - 45
+                txt = sorted((px[x, y] for x in range(mbox[0], mbox[2]) for y in range(mbox[1], mbox[3]) if is_txt(*px[x, y])), key=lum)
+                mcol = txt[len(txt) // 4] if txt else (90, 90, 100, 255)
+                mcol = (mcol[0], mcol[1], mcol[2], 255)
+                # стираем слово и стрелку (у «next» стрелка правее, до кнопки R)
+                ebox = (3, 27, 41, 39) if kind == 'next' else (16, 27, 59, 39)
+                inpaint(im, text_mask(im, ebox, is_txt, grow=1), iters=50)
+                # бледная стрелка у нажатой кнопки - мягче порог
+                arr = (34, 27, 43, 39) if kind == 'next' else (16, 27, 23, 39)
+                inpaint(im, text_mask(im, arr, lambda r, g, b, a: a > 200 and r + g + b < bgl - 15, grow=1), iters=50)
+                draw_text(im, (4, 28, 36, 38) if kind == 'next' else (22, 28, 59, 38), 'МЕСЯЦ',
                           height=7.5, stroke_w=0, color=mcol, stroke=(0, 0, 0, 0), font='bold', max_squeeze=0.75,
                           align='left' if kind == 'next' else 'center')
             job(f'menu/calendar_{f}.bcmdl', f'calendar_{f}_button_{kind}_{st}_00', 90)(btn)
