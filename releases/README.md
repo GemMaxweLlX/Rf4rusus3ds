@@ -6,10 +6,18 @@
 |---|---|---|
 | Nintendo 3DS (Luma, EUR eShop, `000400000014A700`) | `RF4_RUS_3DS_Luma_EUR_<дата>.zip` | папку `luma` в корень SD-карты |
 | Эмуляторы 3DS (Azahar, Citra) | `RF4_RUS_3DS_Emulator_<дата>.zip` | ПКМ по игре → Open Mod Location → папку `romfs`; «ё» заменена на «е» |
+| Текстуры 3DS (пробные) | `RF4_RUS_3DS_textures_TEST_<дата>.zip` | поверх перевода: `luma` или `romfs` |
 | Steam (RF4 Special) | `RF4S_RUS_Steam_<дата>.zip` | папку `Bundle` в корень игры, язык игры — английский |
 | Nintendo Switch (RF4 Special, USA, `010051D00E3A4000`) | `RF4S_RUS_Switch_USA_<дата>.zip` | папку `atmosphere` в корень SD-карты, язык игры — английский |
 
 В каждом архиве есть подробная инструкция `INSTALL_RU.txt`.
+
+## 2026-11-24
+
+- 3DS: метка пола там не работает, поэтому обращения к герою снова в виде «сделал(а)» (2402 реплики).
+- Пробные русские текстуры для 3DS (97 штук) отдельным архивом.
+
+Релиз на GitHub: https://github.com/GemMaxweLlX/Rf4rusus3ds/releases/tag/v2026-11-24
 
 ## 2026-11-16.2
 
