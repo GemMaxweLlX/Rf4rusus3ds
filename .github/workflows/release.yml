@@ -25,6 +25,10 @@ jobs:
           dir="releases/$DATE"
           test -d "$dir"
           notes="$dir/NOTES.md"
+          if gh release view "v$DATE" >/dev/null 2>&1; then
+            gh release edit "v$DATE" --notes-file "$notes"   # релиз уже есть - обновляем описание
+            exit 0
+          fi
           gh release create "v$DATE" "$dir"/*.zip \
             --title "Русский перевод RF4 — $DATE" \
             --notes-file "$notes" \

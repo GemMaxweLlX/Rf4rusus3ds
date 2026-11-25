@@ -3,6 +3,7 @@
 ## Авторы и использованные материалы
 
 **MonkaKarlo** (автор русского перевода RF4 Special) разрешила использовать свои файлы.
+Переведённые текстуры ПК-версии сделали **MonkaKarlo** и **Nightkryptonite**.
 Она передала свои исходники: 19 файлов `.eng` и их версии `.txt`. Они лежат без изменений в `special/monkakarlo/`:
 
 `rf3TxtCalendar_split2_2`, `rf3TxtCropName`, `rf3TxtFriendMonsterName`, `rf3TxtItem_split2_1`, `rf3TxtItem_split2_2`,
